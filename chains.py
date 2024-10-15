@@ -31,28 +31,28 @@ class Chain:
         except OutputParserException:
             raise OutputParserException("There is an error while parsing the output")
         return data if isinstance(data, list) else [data]
-    def write_mail(self, job, project, links):
+    def write_mail(self, job, projects, links):
         prompt_email = PromptTemplate.from_template(
                 """
                 ### JOB DESCRIPTION: {job_description}
                 ### INSTRUCTION:
                 Write as if your name is Piyush kant,You are a data scientist at Stimscience India. You are looking for a great opportunity that is available in the job post.
-                your portfoli is available as csv file in which the skill and the project name is given. Links for some of the projects are also available in the same csv file.
-                If there is no link associated with the rellevent skill, just mention the skill and project name without mentioning the link. 
-                if the skill matches in the job posting, include the skill, and details that matches in the file.
-                If the skill is not available in the techstack that I provided then dont mention those skills in the email.
                 Your job is to write an email like cover letter to the hiriring team regarding the job mentioned above describing your capability in fulfilling their needs.
-                Also add the most relevant skills for that job and the project that is relevent to it in {project}. Also, include the link if and only if the link is mentioned in that row  {link4list}
-                Remember you are Piyush, Data Scientist at StimScience. 
-                Do not provide a preamble.
-                strictly Do not include any skill that is not included in the links 
+
+                your techstacks and details are available as csv file in which the skill and the projects name is given. After writing two paragraphs mention the skills that are matching in the skills mentioned in the jobpost. 
+                All the skills which match in the techstscks with the requuirements mentioned in the jobpost are to be mentioned. 
+                in the last section:
+                The pattern to mention the skills is this: "combine skills {projects} common for one project and seperate them by ','" : Project name{projects} -- Link if available {link4list}             
+                Also add the relevant skills for that job and the projects that is relevent to it in {projects}. Include the link if and only if the link is mentioned in that row  {link4list}
+                If more than one skills falls under one project then combine all the skills separated by comma and just use one line for one project and so on.
+                strictly Do not include any skill that is not included in techstacks. And always include a link when it is matching with a project. 
                 ### EMAIL (NO PREAMBLE):
                 
                 """
                 )
 
         chain_email = prompt_email | self.llm
-        res = chain_email.invoke({"job_description": str(job),"project":project, "link4list": links})
+        res = chain_email.invoke({"job_description": str(job),"projects":projects, "link4list": links})
         return res.content
 if __name__=="__main__":
     print("The stored api key is :{os.getenv('GROQ_API_KEY')}")
